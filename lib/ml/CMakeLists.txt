@@ -18,8 +18,11 @@ include_directories(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS})
 add_library(gradient-descent-objs OBJECT vector_linalg.cpp)
 set_property(TARGET gradient-descent-objs PROPERTY CXX_STANDARD 14)
 
+add_library(data-loader-objs OBJECT data_loader.cpp)
+set_property(TARGET data-loader-objs PROPERTY CXX_STANDARD 14)
+
 # Combine lib-objs
-set(ml-objs $<TARGET_OBJECTS:gradient-descent-objs>)
+set(ml-objs $<TARGET_OBJECTS:gradient-descent-objs> $<TARGET_OBJECTS:data-loader-objs>)
 
 # Visible to parent directory
 set(ml-objs ${ml-objs} PARENT_SCOPE)
