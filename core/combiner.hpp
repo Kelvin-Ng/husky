@@ -18,12 +18,81 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <cmath>
 
 #include "boost/sort/spreadsort/spreadsort.hpp"
 
 #include "base/log.hpp"
 
 namespace husky {
+
+class VarianceMeanNum {
+public:
+    VarianceMeanNum() {
+        variance = 0;
+        mean = 0;
+        num = 0;
+    }
+
+    VarianceMeanNum(double variance, double mean, int num) : variance(variance), mean(mean), num(num) {}
+
+    inline void set(double variance, double mean, int num) {
+        this->variance = variance;
+        this->mean = mean;
+        this->num = num;
+    }
+
+    // it works even when one side has num == 0
+    VarianceMeanNum& operator+=(const VarianceMeanNum& rhs) {
+        if (rhs.num == 0) {
+            return *this;
+        }
+
+        int num_ = num + rhs.num;
+        double delta = rhs.mean - mean;
+        double mean_ = (mean * num + rhs.mean * rhs.num) / num_;
+        variance = (variance * num + rhs.variance * rhs.num + delta * delta * num * rhs.num / num_) / num_;
+
+        mean = mean_;
+        num = num_;
+
+        return *this;
+    }
+
+    VarianceMeanNum operator+(const VarianceMeanNum& rhs) {
+        VarianceMeanNum res = *this;
+        res += rhs;
+        return res;
+    }
+
+    VarianceMeanNum& operator+=(double rhs) {
+        int num_ = num + 1;
+        double delta = rhs - mean;
+        double mean_ = (mean * num + rhs) / (num_);
+        variance = (variance * num + (rhs - mean) * (rhs - mean_)) / num_;
+
+        mean = mean_;
+        num = num_;
+
+        return *this;
+    }
+
+    VarianceMeanNum operator+(double rhs) {
+        VarianceMeanNum res = *this;
+        res += rhs;
+        return res;
+    }
+
+    inline double get_variance() const { return variance; }
+    inline double get_sd() const { return std::sqrt(variance); }
+    inline double get_mean() const { return mean; }
+    inline int get_num() const { return num; }
+
+private:
+    double variance;
+    double mean;
+    int num;
+};
 
 struct HashCombinerBase {};
 
